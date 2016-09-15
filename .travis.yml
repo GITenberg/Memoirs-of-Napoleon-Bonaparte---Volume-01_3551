@@ -1,0 +1,61 @@
+sudo: required
+dist: trusty
+language: ruby
+
+before_install:
+before_install:
+- gem install asciidoctor -v 1.5.2
+- gem install tilt
+- sudo pip install git+https://github.com/gitenberg-dev/gitberg
+- sudo pip install pillow
+- sudo pip install cssutils
+- sudo pip install docutils
+- sudo pip install roman
+- sudo pip install git+https://github.com/gitenberg-dev/pg-epubmaker
+script:
+- VERSION=`ruby -e "require 'yaml'; meta = YAML.load_file('metadata.yaml'); puts meta['_version'];"`
+- git clone https://github.com/gitenberg-dev/asciidoctor-htmlbook.git
+- sudo pip install -r asciidoctor-htmlbook/gitberg-machine/requirements.txt
+
+- /usr/bin/python -c "from gitenberg import travis; travis.build_epub()"
+- ebook-convert book.epub book.mobi
+- xvfb-run ebook-convert book.epub book.pdf
+branches:
+  only:
+  - master
+notifications:
+  webhooks:
+    urls:
+      - https://unglue.it/api/travisci/webhook
+    on_success: always
+    on_failure: never
+    on_start: never
+deploy:
+  skip_cleanup: true
+  provider: releases
+  api_key:
+    secure: f8HXVS0jYA/MiTaf91IBIEgt5E9lMZfg47MTlySMnHM5jn3ma0xR53R1comiIOl9E02ypXGFkgB2g8ZeI5bh+/2M3CGdW/GK7ze+H0U9ZAw6vSsrf4dRq+p2vOGAOJzKNJXpaHOq/xYt6hAd+p51bZ2pL+VeU2z0XczGaPMhMm8QH7joaJVKK/eH6t02kTMJmcK+kU90exr/jQ34yNHQwAD5DCrgp4X6x2tLxGnQgFGAebVgdW7LCjO2+jGav8EHPVQFktM7X6yAdZsffcgRdlMntQpHZryDTMZxW3mWttB8qbO86c7ArrN6cr3JVtMa7+McCgDaA5OATSWpR0wDVtK6wDDudI3kv8mlSphFdHZgmyisoH7b5O6jS6pErU9PZrTtPKYqpMRBvSNTSRB5ycpv7sIlp8NeGdE5elKblM3jldiLeANe7xe3z7QDI4xELf8WWRnorxdGAOcXa2d8Dl4XEK15GTfPZgV4bMfkqq0VC3dguBpR8cxat/cGH935+DTMTUZ3rc5xgL/75ENIsXsjame9jwLPn7CyD5kUQJsozgeB6Lj7u0MbCakEVA9ZmLAuubpPRJlWLvTelgPKff/1gG+jGYW1/az9MWYPmjNYkrESsEzllbAN0nHzLXYqBA2IaRPXCbh+IBaA8JlxFVhtYP+zXEHAFHNxRdDByMc=
+  file:
+    - book.epub
+    - book.mobi
+    - book.pdf
+  "on":
+    repo: GITenberg/Memoirs-of-Napoleon-Bonaparte---Volume-01_3551
+addons:
+  apt:
+    packages:
+    - xsltproc
+    - xvfb
+    - calibre
+    - python-pip
+    - git
+    - python-dev
+    - libjpeg-dev
+    - libpng-dev
+    - libfreetype6
+    - libfreetype6-dev
+    - zlib1g-dev
+    - python-lxml
+    - libxml2-dev
+    - libxslt1-dev
+    - tidy
